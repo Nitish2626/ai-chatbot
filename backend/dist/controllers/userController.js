@@ -9,6 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { userModel } from "../models/userModel.js";
 import bcrypt from "bcrypt";
+import { createToken } from "../utils/tokenManager.js";
+import { COOKIE_NAME } from "../utils/constants.js";
 export const getAllUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const allUsers = yield userModel.find();
@@ -21,18 +23,71 @@ export const getAllUsers = (req, res, next) => __awaiter(void 0, void 0, void 0,
 export const userSignup = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, email, password } = req.body;
-        const findUser = yield userModel.find({ email });
-        if (email !== (findUser === null || findUser === void 0 ? void 0 : findUser.email)) {
+        const findUser = yield userModel.findOne({ email });
+        if (!findUser) {
             const hashedPassword = yield bcrypt.hash(password, 10);
             const newUser = new userModel({ name, email, password: hashedPassword });
             yield newUser.save();
-            res.status(200).send(newUser);
+            res.clearCookie(COOKIE_NAME, {
+                path: "/",
+                domain: "localhost",
+                httpOnly: true,
+                signed: true
+            });
+            const token = createToken(newUser._id.toString(), newUser.email, "7d");
+            const expires = new Date();
+            expires.setDate(expires.getDate() + 7);
+            res.cookie(COOKIE_NAME, token, {
+                path: "/",
+                domain: "localhost",
+                expires,
+                httpOnly: true,
+                signed: true
+            });
+            res.status(201).send(newUser);
         }
         else {
-            res.status(201).send("You have already registered please Login");
+            res.status(401).send("You have already registered please Login");
         }
     }
     catch (error) {
         console.log("User Signup Error", error);
+    }
+});
+export const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email, password } = req.body;
+        const findUser = yield userModel.findOne({ email });
+        if (findUser) {
+            const isPasswordCorrect = yield bcrypt.compare(password, findUser.password);
+            if (isPasswordCorrect) {
+                res.clearCookie(COOKIE_NAME, {
+                    path: "/",
+                    domain: "localhost",
+                    httpOnly: true,
+                    signed: true
+                });
+                const token = createToken(findUser._id.toString(), findUser.email, "7d");
+                const expires = new Date();
+                expires.setDate(expires.getDate() + 7);
+                res.cookie(COOKIE_NAME, token, {
+                    path: "/",
+                    domain: "localhost",
+                    expires,
+                    httpOnly: true,
+                    signed: true
+                });
+                res.status(200).send("User Loggedin Successfully");
+            }
+            else {
+                res.status(403).send("Password is incorrect");
+            }
+        }
+        else {
+            res.status(401).send("User not registered");
+        }
+    }
+    catch (error) {
+        console.log("User Login Error", error);
     }
 });
