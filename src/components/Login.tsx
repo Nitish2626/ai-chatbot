@@ -7,27 +7,25 @@ import { useRef } from "react";
 
 const Login = () => {
 
-    const auth=useAuth();
+    const auth = useAuth();
     const navigate = useNavigate();
 
-    const emailRef:React.RefObject<HTMLInputElement> = useRef(null);
-    const passwordRef:React.RefObject<HTMLInputElement> = useRef(null);
+    const emailRef = useRef<HTMLInputElement | null>(null);
+    const passwordRef = useRef<HTMLInputElement | null>(null);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const email=emailRef.current;
-        const password=passwordRef.current;
-        console.log(email,password);
-        // try {
-        //     const verified=await auth?.login(email,password);
-        //     if(verified){
-        //         alert("User Loggedin Successfully");
-        //         navigate("/");
-        //     }
-        // }
-        // catch (err) {
-        //     alert(err);
-        // }
+        const email = emailRef.current?.value as string;
+        const password = passwordRef.current?.value as string;
+        try { 
+            const verified = auth?.login(email,password);
+            if(verified){
+                navigate("/");
+            }
+        }
+        catch (err) {
+            alert(err);
+        }
     }
 
     return (
@@ -38,8 +36,18 @@ const Login = () => {
                     Login
                 </h1>
 
-                <CustomizedInput type="email" name="email" label="Email" ref={emailRef} />
-                <CustomizedInput type="password" name="password" label="Password" ref={passwordRef} />
+                <CustomizedInput
+                    type="email"
+                    name="email"
+                    label="Email"
+                    val={emailRef}
+                />
+                <CustomizedInput
+                    type="password"
+                    name="password"
+                    label="Password"
+                    val={passwordRef}
+                />
 
                 <button type="submit" className="w-28 flex items-center justify-center gap-2 text-white bg-green-600 text-xl py-2 rounded-md mt-2 hover:bg-green-800">
                     Login

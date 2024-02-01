@@ -49,7 +49,7 @@ export const userSignup=async(
                 signed:true
             });
 
-            res.status(201).send(newUser);
+            res.status(201).send({name:newUser.name,email:newUser.email});
         }
         else{
             res.status(401).send("You have already registered please Login");
@@ -88,7 +88,7 @@ export const userLogin=async(
                     httpOnly:true,
                     signed:true
                 });
-                res.status(200).send("User Loggedin Successfully");
+                res.status(200).send({name:findUser.name,email:findUser.email});
             }
             else{
                 res.status(403).send("Password is incorrect");

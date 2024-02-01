@@ -5,6 +5,10 @@ import Login from "./components/Login";
 import Chat from "./components/Chat";
 import NotFound from "./components/NotFound";
 import Header from "./components/Header";
+import axios from "axios";
+
+axios.defaults.baseURL="http://localhost:5000/api/v1";
+axios.defaults.withCredentials=true;
 
 const App=()=>{
   return (
