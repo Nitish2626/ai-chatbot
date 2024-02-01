@@ -10,11 +10,26 @@ export const createToken = (id: string, email: string, expiresIn: string) => {
     return token;
 };
 
-export const verifyToken = (
+export const verifyToken = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    const token=req.signedCookies[`${COOKIE_NAME}`];
-    console.log(token);
+    const token = await req.signedCookies[`${COOKIE_NAME}`];
+    if (!token || token.trim() === "") {
+        res.status(401).send("Token not Received");
+        next();
+    }
+    else {
+        const verified = jwt.verify(token, `${process.env.JWT_SECRET}`);
+        if (verified) {
+            res.locals.jwtData = verified;
+            res.status(200).send("User Verification Successfull");
+            // next();
+        }
+        else {
+            res.status(401).send("Token Expired");
+            next();
+        }
+    }
 };

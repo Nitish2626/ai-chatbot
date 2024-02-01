@@ -5,99 +5,120 @@ import { createToken } from "../utils/tokenManager.js";
 import { COOKIE_NAME } from "../utils/constants.js";
 
 export const getAllUsers = async (
-    req: Request, 
-    res: Response, 
+    req: Request,
+    res: Response,
     next: NextFunction
 ) => {
     try {
         const allUsers = await userModel.find();
         res.status(200).send(allUsers);
-    } 
+    }
     catch (error) {
         console.log("User Controller Error", error);
     }
 };
 
-export const userSignup=async(
-    req:Request,
-    res:Response,
-    next:NextFunction
-)=>{
+export const userSignup = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
-        const {name,email,password}=req.body;
-        const findUser=await userModel.findOne({email});
-        if(!findUser){
-            const hashedPassword=await bcrypt.hash(password,10);
-            const newUser=new userModel({name,email,password:hashedPassword});
+        const { name, email, password } = req.body;
+        const findUser = await userModel.findOne({ email });
+        if (!findUser) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const newUser = new userModel({ name, email, password: hashedPassword });
             await newUser.save();
 
-            res.clearCookie(COOKIE_NAME,{
-                path:"/",
-                domain:"localhost",
-                httpOnly:true,
-                signed:true
+            res.clearCookie(COOKIE_NAME, {
+                path: "/",
+                domain: "localhost",
+                httpOnly: true,
+                signed: true
             });
 
-            const token=createToken(newUser._id.toString(),newUser.email,"7d");
-            const expires=new Date();
-            expires.setDate(expires.getDate()+7);
-            res.cookie(COOKIE_NAME,token,{
-                path:"/",
-                domain:"localhost",
+            const token = createToken(newUser._id.toString(), newUser.email, "7d");
+            const expires = new Date();
+            expires.setDate(expires.getDate() + 7);
+            res.cookie(COOKIE_NAME, token, {
+                path: "/",
+                domain: "localhost",
                 expires,
-                httpOnly:true,
-                signed:true
+                httpOnly: true,
+                signed: true
             });
 
-            res.status(201).send({name:newUser.name,email:newUser.email});
+            res.status(201).send({ name: newUser.name, email: newUser.email });
         }
-        else{
+        else {
             res.status(401).send("You have already registered please Login");
         }
-    } 
-    catch (error) {
-        console.log("User Signup Error",error);
     }
-}
+    catch (error) {
+        console.log("User Signup Error", error);
+    }
+};
 
-export const userLogin=async(
-    req:Request,
-    res:Response,
-    next:NextFunction
-)=>{
+export const userLogin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
-        const {email,password}=req.body;
-        const findUser=await userModel.findOne({email});
-        if(findUser){
-            const isPasswordCorrect=await bcrypt.compare(password,findUser.password);
-            if(isPasswordCorrect){
-                res.clearCookie(COOKIE_NAME,{
-                    path:"/",
-                    domain:"localhost",
-                    httpOnly:true,
-                    signed:true
+        const { email, password } = req.body;
+        const findUser = await userModel.findOne({ email });
+        if (findUser) {
+            const isPasswordCorrect = await bcrypt.compare(password, findUser.password);
+            if (isPasswordCorrect) {
+                res.clearCookie(COOKIE_NAME, {
+                    path: "/",
+                    domain: "localhost",
+                    httpOnly: true,
+                    signed: true
                 });
 
-                const token=createToken(findUser._id.toString(),findUser.email,"7d");
-                const expires=new Date();
-                expires.setDate(expires.getDate()+7);
-                res.cookie(COOKIE_NAME,token,{
-                    path:"/",
-                    domain:"localhost",
+                const token = createToken(findUser._id.toString(), findUser.email, "7d");
+                const expires = new Date();
+                expires.setDate(expires.getDate() + 7);
+                res.cookie(COOKIE_NAME, token, {
+                    path: "/",
+                    domain: "localhost",
                     expires,
-                    httpOnly:true,
-                    signed:true
+                    httpOnly: true,
+                    signed: true
                 });
-                res.status(200).send({name:findUser.name,email:findUser.email});
+                res.status(200).send({ name: findUser.name, email: findUser.email });
             }
-            else{
+            else {
                 res.status(403).send("Password is incorrect");
             }
         }
-        else{
+        else {
             res.status(401).send("User not registered");
         }
     } catch (error) {
-        console.log("User Login Error",error);
+        console.log("User Login Error", error);
     }
-}
+};
+
+export const verifyUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const user = await userModel.findById({ email: res.locals.jwtData.id });
+    console.log(user);
+    if (!user) {
+        res.status(401).send("User not registered or Token malfunctioned");
+    }
+    else {
+        if (user._id.toString() !== res.locals.jwtData.id) {
+            res.status(401).send("Permission didn't match");
+        }
+        else{
+            res.status(200).send({name:user.name,email:user.email});
+            console.log(user.name,user.email);
+        }
+    }
+};

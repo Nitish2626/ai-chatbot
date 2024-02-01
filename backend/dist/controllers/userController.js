@@ -91,3 +91,19 @@ export const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, f
         console.log("User Login Error", error);
     }
 });
+export const verifyUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield userModel.findById({ email: res.locals.jwtData.id });
+    console.log(user);
+    if (!user) {
+        res.status(401).send("User not registered or Token malfunctioned");
+    }
+    else {
+        if (user._id.toString() !== res.locals.jwtData.id) {
+            res.status(401).send("Permission didn't match");
+        }
+        else {
+            res.status(200).send({ name: user.name, email: user.email });
+            console.log(user.name, user.email);
+        }
+    }
+});
