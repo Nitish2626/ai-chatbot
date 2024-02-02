@@ -77,7 +77,7 @@ export const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, f
                     httpOnly: true,
                     signed: true
                 });
-                res.status(200).send({ name: findUser.name, email: findUser.email });
+                return res.status(200).send({ name: findUser.name, email: findUser.email });
             }
             else {
                 res.status(403).send("Password is incorrect");
@@ -92,18 +92,12 @@ export const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, f
     }
 });
 export const verifyUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield userModel.findById({ email: res.locals.jwtData.id });
-    console.log(user);
+    const user = yield userModel.findById({ _id: res.locals.jwtData.id });
+    console.log("Verify User", user);
     if (!user) {
         res.status(401).send("User not registered or Token malfunctioned");
     }
     else {
-        if (user._id.toString() !== res.locals.jwtData.id) {
-            res.status(401).send("Permission didn't match");
-        }
-        else {
-            res.status(200).send({ name: user.name, email: user.email });
-            console.log(user.name, user.email);
-        }
+        res.status(200).send({ name: user.name, email: user.email });
     }
 });

@@ -26,12 +26,11 @@ export const verifyToken = (req, res, next) => __awaiter(void 0, void 0, void 0,
         const verified = jwt.verify(token, `${process.env.JWT_SECRET}`);
         if (verified) {
             res.locals.jwtData = verified;
-            res.status(200).send("User Verification Successfull");
-            // next();
+            res.status(200).send(verified);
         }
         else {
             res.status(401).send("Token Expired");
-            next();
         }
+        next();
     }
 });

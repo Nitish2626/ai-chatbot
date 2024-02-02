@@ -6,7 +6,7 @@ const Header = () => {
     const auth=useAuth();
     return (
         <>
-            <div className="w-full h-10 flex items-center justify-between sticky top-0 px-5 bg-black">
+            <div className="w-full h-12 flex items-center justify-between sticky top-0 px-5 bg-black z-10">
                 <Logo />
                 <div className="flex gap-4">
                     {auth?.isLoggedIn ? (
