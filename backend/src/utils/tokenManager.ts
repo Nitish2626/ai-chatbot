@@ -24,8 +24,6 @@ export const verifyToken = async (
         const verified = jwt.verify(token, `${process.env.JWT_SECRET}`);
         if (verified) {
             res.locals.jwtData = verified;
-            res.status(200).send(verified);
-
         }
         else {
             res.status(401).send("Token Expired");

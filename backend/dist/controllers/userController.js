@@ -93,11 +93,10 @@ export const userLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, f
 });
 export const verifyUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield userModel.findById({ _id: res.locals.jwtData.id });
-    console.log("Verify User", user);
     if (!user) {
         res.status(401).send("User not registered or Token malfunctioned");
     }
     else {
-        res.status(200).send({ name: user.name, email: user.email });
+        res.status(200).send({ name: user === null || user === void 0 ? void 0 : user.name, email: user === null || user === void 0 ? void 0 : user.email });
     }
 });
