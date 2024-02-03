@@ -7,18 +7,27 @@ import NotFound from "./components/NotFound";
 import Header from "./components/Header";
 import axios from "axios";
 import SearchBar from "./components/SearchBar";
+import { useState} from "react";
 
 axios.defaults.baseURL="http://localhost:5000/api/v1";
 axios.defaults.withCredentials=true;
 
+type Messages={
+  role:"string";
+  content:string
+};
+
 const App=()=>{
+
+  const [messages,setMessages]=useState<Messages[]>([]);
+
   return (
     <Router>
       <Header />
-      <SearchBar />
+      <SearchBar msg={setMessages} />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/chat" element={<Chat />} />
+        <Route path="/chat" element={<Chat msg={messages} />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="*" element={<NotFound />} />

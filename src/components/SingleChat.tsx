@@ -1,7 +1,7 @@
 import { useAuth } from "../context/AuthContext";
 import openai from "../images/openai-logo.png";
 
-const SingleChat = ({ role, content }: any) => {
+const SingleChat = ({ role, content }: {role:string, content:string}) => {
 
     const auth = useAuth();
 
