@@ -13,9 +13,11 @@ const SearchBar = ({msg}:any) => {
             inputRef.current.value="";
         }
         const newMessage={role:"user",content};
+        console.log("New message",newMessage);
         msg((prev:any)=>[...prev, newMessage]);
         const chatData=await sendChatRequest(content);
-        msg([...chatData.chats]);
+        console.log("Chat Data",chatData);
+        // msg([...chatData.chats]);
     };
 
     return (
